@@ -1,5 +1,6 @@
 
 /* COPYRIGHT C 1991- Ali Dasdan */ 
+/* 0-1或a-b的随机数发生器*/
 
 #include <time.h>
 #include <stdlib.h>

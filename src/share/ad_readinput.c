@@ -12,28 +12,28 @@
 /* initialize cells array */
 void init_cells(int nocells, cells_t cells[])
 {
-    for (int i = 0; i < nocells; i++) {
-        cells[i].cno_nets = 0;
-        cells[i].cno_inets = 0;
-        cells[i].netlist = NIL;
+    for (int i = 0; i < nocells; i++) { //节点数
+        cells[i].cno_nets = 0;  //节点的总边数
+        cells[i].cno_inets = 0; //在划分内的遍数
+        cells[i].netlist = NIL; //指向节点边的指针
     }   /* for */
 }   /* init_cells */
 
 /* initialize netlist pointers */
 void init_netlist(int nonets,
-                  cells_t cells[],
-                  nets_t nets[],
-                  corn_t cnets[])
+                  cells_t cells[], //节点信息数组
+                  nets_t nets[],   //边信息数组（权值、两端点）
+                  corn_t cnets[])  //节点或边的数量数组
 {
-    for (int i = 0; i < nonets; i++) {
+    for (int i = 0; i < nonets; i++) { //边数
         /* for cell1 and cell2 */
-        for (int j = 0; j < 2; j++) {
-            int tcell_no = nets[i].ncells[0];
+        for (int j = 0; j < 2; j++) {  //两端点
+            int tcell_no = nets[i].ncells[0]; //左端点（值为节点数组中的位置）
             if (j != 0) {
-                tcell_no = nets[i].ncells[1];
+                tcell_no = nets[i].ncells[1]; //右端点
             }
-            int net_index = cells[tcell_no].netlist + cells[tcell_no].cno_inets;
-            cnets[net_index].corn_no = i;
+            int net_index = cells[tcell_no].netlist + cells[tcell_no].cno_inets; //该节点的指针值+其划分内的边数
+            cnets[net_index].corn_no = i;//应该不是FM算法
             cells[tcell_no].cno_inets++;
             if (cells[tcell_no].cno_inets > cells[tcell_no].cno_nets) {
                 printf("Error: Inconsistency in cell_%d degrees.\n", j);
@@ -79,7 +79,7 @@ void read_graph(char fname[],
                 int *max_nweight,
                 cells_t cells[],
                 nets_t  nets[],
-                corn_t  cnets[])
+                corn_t  cnets[]) //数量数组（边/节点）
 {
     FILE *fp;
     open_file(&fp, fname, "r");
@@ -122,16 +122,16 @@ void read_graph(char fname[],
     *totcellsize = 0;
     int part_sum = 0;
     for (int i = 0; i < nocells; i++) {
-        if (fscanf(fp, "%d", &cells[i].cweight) == EOF) {
+        if (fscanf(fp, "%d", &cells[i].cweight) == EOF) { //读入边权值
             printf("Error: Cannot read from %s: errno= %d error= %s\n", fname, errno, strerror(errno));
             close_file(&fp);
             exit(1);
         }
         (*totcellsize) += cells[i].cweight;
-        if (cells[i].cweight > (*max_cweight)) { 
+        if (cells[i].cweight > (*max_cweight)) {  //计算maxNET 
             *max_cweight = cells[i].cweight;
         }
-        if (cells[i].cno_nets > (*max_density)) {
+        if (cells[i].cno_nets > (*max_density)) { 
             *max_density = cells[i].cno_nets;
         }
         cells[i].netlist = part_sum;

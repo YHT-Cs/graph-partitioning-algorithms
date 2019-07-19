@@ -53,7 +53,7 @@ void print_parts(int nocells,
                ind->parts[i].pmax_cells);
 
         int k = 0;
-        for (int j = 0; j < nocells; j++) {
+        for (int j = 0; j < nocells; j++) {//看不太懂，tchrom是什么
             if (tchrom[j] == i)  {
                 printf("%d ", j);
                 k++;

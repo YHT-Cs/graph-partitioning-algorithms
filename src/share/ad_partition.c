@@ -25,46 +25,52 @@ int create_partition(int nocells,
     }   /* for i */
 
     /* allocate temporary memory */
-    int *tparts = (int *) calloc(noparts, sizeof(int));
+    int *tparts = (int *) calloc(noparts, sizeof(int));//申明为数组
     if (tparts == NULL) {
         printf("Error: Unable to allocate memory for tparts.\n");
         exit(1);
     }   /* if */
 
     /* insert cells */
-    for (int i = 0; i < nocells; i++) {
+    for (int i = 0; i < nocells; i++) { // 为什么每个节点时都要对所有划分进行遍历
 
-        /* find minimum */
-        int min_inx = 0;
-        int min_size = ind->parts[0].pcurr_size;
-        for (int j = 1; j < noparts; j++) {
+        /* find minimum */  
+	//没有涉及i	
+	//为什么要找到这个？
+        int min_inx = 0; //指示所有划分中最小的划分在parts中的位置
+        int min_size = ind->parts[0].pcurr_size;//记录最小划分的size
+        for (int j = 1; j < noparts; j++) { //对划分进行遍历
             if (min_size > ind->parts[j].pcurr_size) {
                 min_inx = j;
                 min_size = ind->parts[j].pcurr_size;
             }   /* if */
         }   /* for j */
 
-        /* find a new minimum among the same minimums */
+        /* find a new minimum among the same minimums */、
+	//没有涉及i
         int tcount = -1; /* tparts is used to randomize partitioning */
-        for (int j = 0; j < noparts; j++) {
+        for (int j = 0; j < noparts; j++) {//对size相同且等于当时最小size的节点进行分类
+		//对划分进行遍历
             if (ind->parts[j].pcurr_size == min_size) {
                 tcount++; 
-                tparts[tcount] = j;
+                tparts[tcount] = j; //记录第count个划分本来的位置
             }   /* if */
         }   /* for j */
-        min_inx = tparts[irandom(0, tcount)];
+        min_inx = tparts[irandom(0, tcount)]; //新的最小就是随机定一个
 
         /* assign cell i to part[min_inx] */
-        ind->chrom[i] = min_inx;
+        ind->chrom[i] = min_inx;//chorm的大小和节点的个数一样，记录该节点被分配到的划分的
+	//节点总是被分配到最小的划分中
         ind->parts[min_inx].pcurr_size += cells[i].cweight; 
         ind->parts[min_inx].pmax_cells++; 
     }   /* for i */
 
+    //计算划分的平衡性
     float off_ratio = 0.1;
     int max_size = -1;
     for (int i = 0; i < noparts; i++) {
         float part_size = ((float) totsize) * ind->parts[i].pratio;
-        ind->parts[i].pmax_size = (int) (part_size * (1.0 + off_ratio) + 1.0);
+        ind->parts[i].pmax_size = (int) (part_size * (1.0 + off_ratio) + 1.0); //这个式子细节没明白，但肯定是算此划分的最大容量
         if (ind->parts[i].pmax_size > max_size) { 
             max_size = ind->parts[i].pmax_size;
         }

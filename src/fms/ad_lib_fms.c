@@ -21,15 +21,17 @@ void create_buckets(int nocells,
                     cells_info_t cells_info[])
 {
     /* read cell gains from cells_info and insert them into buckets */
-    for (int cell_no = 0; cell_no < nocells; cell_no++) {
+	//在整个程序中bucket到底是干什么的？
+	for (int cell_no = 0; cell_no < nocells; cell_no++) { //遍历所有节点
 
-        int part_no = chrom[cell_no];
+        int part_no = chrom[cell_no]; //该机节点所在划分 
 
         /* for each possible move direction */
-        for (int mov_part_no = 0; mov_part_no < noparts; mov_part_no++) {
+        for (int mov_part_no = 0; mov_part_no < noparts; mov_part_no++) {//遍历所在划分之前的所有划分
+		//划分是按照什么来编号的？使得编号在此划分之前的即为所有可能的目的划分
             if (mov_part_no != part_no) {
 
-                int mov_gain = calculate_gain(cell_no, part_no, mov_part_no, cells_info);
+                int mov_gain = calculate_gain(cell_no, part_no, mov_part_no, cells_info);//计算此move的gain
 
                 /* find mapped_after calculating gain & max */
                 int mapped_part_no = map_part_no(mov_part_no, part_no);

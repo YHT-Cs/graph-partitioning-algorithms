@@ -7,6 +7,7 @@
 #include "ad_lib.h"
 
 /* find the neighbor cell of cell_no, on the net net_no */
+//找到连接点，及其所在划分，及连接边的权重
 void find_other_cell(int net_no, 
                      int cell_no,
                      int *other_cell, 
@@ -26,6 +27,7 @@ void find_other_cell(int net_no,
 }   /* find_other_cell */
  
 /* initialize all bucket indices and pointers */
+//bucket是做什么用的？
 void init_buckets(int noparts, 
                   int bucketsize,
                   partb_t partb[][noparts - 1])
@@ -60,6 +62,7 @@ int map_part_no(int dest_part, int home_part)
 }   /* map_part_no */
  
 /* compute move gain from home_part to dest_part */
+//与论文中的拉力-阻力一致
 int calculate_gain(int cell_no, 
                    int home_part, 
                    int dest_part,
@@ -71,6 +74,7 @@ int calculate_gain(int cell_no,
 }   /* calculate_gain */
 
 /* compute gains of all cells and place them into cells_info */
+//关键是计算拉力和阻力
 void compute_gains(int nocells, 
                    int noparts,
                    allele tchrom[],
@@ -101,9 +105,11 @@ void compute_gains(int nocells,
             int net_no = cnets[net_ptr].corn_no;
 
             int other_cell, other_part_no, net_weight;
-            find_other_cell(net_no, cell_no,
+            //找到邻接点
+	    find_other_cell(net_no, cell_no,
                             &other_cell, &other_part_no, &net_weight,
                             tchrom, nets);
+	    //对所有处在其他划分的邻接点进行计算，累加连接边的边权
             cells_info[cell_no].mgain[other_part_no] += net_weight;
             net_ptr++;  
 
@@ -160,7 +166,8 @@ void number_nodes(int noparts,
     }   /* for i */
 }   /* number_nodes */
 
-/* find set of cells to be actually moved */
+/* find set of cells to be actually moved */、
+//是一个要移动的节点的集合
 int find_move_set(mcells_t mcells[],
                   int msize,
                   int *max_mcells_inx)
@@ -169,7 +176,7 @@ int find_move_set(mcells_t mcells[],
     *max_mcells_inx = -1;
     int gain_sum = 0;
     for (int i = 0; i < msize; i++) {
-        gain_sum += mcells[i].mgain;
+        gain_sum += mcells[i].mgain; //计算一个pass的gain总值，论文中为Gm
         if (gain_sum > max_gain_sum) {
             *max_mcells_inx = i;
             max_gain_sum = gain_sum;
@@ -181,8 +188,8 @@ int find_move_set(mcells_t mcells[],
 
 /* move cells actually */
 int move_cells(int wflag,
-               mcells_t mcells[],
-               int max_mcells_inx, 
+               mcells_t mcells[], //pass集合
+               int max_mcells_inx, //集合中gain值最大的节点
                int cutsize, 
                int *glob_inx,
                ind_t *ind,
@@ -194,7 +201,7 @@ int move_cells(int wflag,
 
     int cut_gain = 0;
 
-    for (int i = 0; i <= max_mcells_inx; i++) {
+    for (int i = 0; i <= max_mcells_inx; i++) { //对最大节点之前的节点进行遍历
 
         if (wflag == True) {
             tcutsize -= mcells[i].mgain;
@@ -204,7 +211,7 @@ int move_cells(int wflag,
         }    /* if wflag */
 
         ind->chrom[mcells[i].cell_no] = mcells[i].to;
-        cut_gain += mcells[i].mgain;
+        cut_gain += mcells[i].mgain; //cut_gain是所有move的gain值累加
 
         /* update partition size limits */
         ind->parts[mcells[i].from].pmax_cells--;
